@@ -1,0 +1,82 @@
+/* In game.css */
+/* This file now ONLY styles the game board and its controls. */
+
+:root {
+    --player-X-color: #09C372;
+    --player-O-color: #498AFB;
+}
+
+.title {
+    font-size: 2em;
+    color: var(--dark-color);
+    margin-bottom: 20px;
+}
+
+.display {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+.playerX {
+    color: var(--player-X-color);
+}
+
+.playerO {
+    color: var(--player-O-color);
+}
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px;
+    background-color: #4c566a;
+    border-radius: 5px;
+}
+
+.tile {
+    width: 100px;
+    height: 100px;
+    background-color: var(--light-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3em;
+    cursor: pointer;
+}
+
+.tile.playerX {
+    color: var(--player-X-color);
+}
+
+.tile.playerO {
+    color: var(--player-O-color);
+}
+
+.announcer.hide {
+    display: none;
+}
+
+.controls {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.btn-reset {
+    background-color: #bf616a;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}
+
+.back-link {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.back-link:hover {
+    color: var(--primary-color);
+}

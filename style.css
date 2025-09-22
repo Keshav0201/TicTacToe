@@ -1,0 +1,426 @@
+/* In style.css */
+
+/* General Styling & Variables */
+:root {
+    --primary-color: #498AFB;
+    --secondary-color: #09C372;
+    --dark-color: #2e3440;
+    --light-color: #eceff4;
+    --body-bg-color: #d8dee9;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--body-bg-color);
+    color: var(--dark-color);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Navbar Styling */
+.navbar {
+    background-color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.navbar-logo {
+    color: var(--dark-color);
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.navbar-logo .fa-gamepad {
+    margin-right: 0.5rem;
+    color: var(--primary-color);
+}
+
+/* Main Content & Hero Section */
+.main-content {
+    flex-grow: 1; /* Pushes the footer down */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+.hero-container h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero-container .subtitle {
+    font-size: 1.2rem;
+    color: #6c757d;
+    margin-bottom: 2rem;
+}
+
+/* Button Styling */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem; /* Space between buttons */
+}
+
+.btn {
+    display: inline-block;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 50px; /* Rounded buttons */
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+/* Footer Styling */
+.footer {
+    background-color: var(--dark-color);
+    color: var(--light-color);
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: auto; /* Pushes footer to the bottom */
+}
+
+/* Add this to style.css */
+
+.user-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+#user-display-name {
+    font-weight: bold;
+}
+
+#logout-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+}
+
+/* Add this to the end of style.css */
+
+/* --- Dashboard Layout --- */
+
+.dashboard-layout {
+    display: flex;
+    flex-grow: 1; /* This makes the layout fill the space between the navbar and footer */
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #fff;
+    padding: 1.5rem;
+    border-right: 1px solid #e5e9f0;
+    flex-shrink: 0; /* Prevents the sidebar from shrinking */
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    color: #4c566a;
+    text-decoration: none;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-nav li a .fas {
+    margin-right: 1rem;
+    width: 20px; /* Aligns the text by giving icons a fixed width */
+    color: #6c757d;
+}
+
+.sidebar-nav li a:hover {
+    background-color: #f8f9fa;
+    color: var(--dark-color);
+}
+
+.sidebar-nav li a.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.sidebar-nav li a.active .fas {
+    color: white;
+}
+
+.dashboard-content {
+    flex-grow: 1;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; 
+}
+
+.dashboard-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Add this to the end of style.css */
+
+/* --- Dashboard Stats --- */
+.stats-container {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.stat-card {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e5e9f0;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.stat-card h2 {
+    font-size: 1rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card p {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--dark-color);
+}
+
+/* In game.css */
+/* This file now ONLY styles the game board and its controls. */
+
+:root {
+    --player-X-color: #09C372;
+    --player-O-color: #498AFB;
+}
+
+/* A wrapper for the game content */
+.game-wrapper {
+    text-align: center;
+}
+
+.title {
+    font-size: 2em;
+    color: var(--dark-color);
+    margin-bottom: 20px;
+}
+
+.display {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+.playerX {
+    color: var(--player-X-color);
+}
+
+.playerO {
+    color: var(--player-O-color);
+}
+
+.container {
+    display: grid;
+    height: 310px;
+    width: 310px;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px;
+    background-color: #4c566a;
+    border-radius: 5px;
+    margin: 0 auto; /* Center the container within the wrapper */
+}
+
+.tile {
+    width: 100px;
+    height: 100px;
+    background-color: var(--light-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3em;
+    cursor: pointer;
+}
+
+.tile.playerX {
+    color: var(--player-X-color);
+}
+
+.tile.playerO {
+    color: var(--player-O-color);
+}
+
+.announcer.hide {
+    display: none;
+}
+
+.controls {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Custom style for the reset button */
+.btn-reset {
+    background-color: #bf616a;
+    color: white;
+    padding: 0.75rem 1.5rem; /* Slightly smaller than main buttons */
+    font-size: 1rem;
+}
+
+.back-link {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.back-link:hover {
+    color: var(--primary-color);
+}
+
+/* Add this to the end of style.css */
+
+/* --- Scoreboard Styling --- */
+.scoreboard {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 310px; /* Match the game board width */
+    margin: 0 auto 1rem auto;
+    background-color: #fff;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #e5e9f0;
+}
+
+.score {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+/* Add this to the end of style.css */
+
+/* --- Join Game Form Styling --- */
+.join-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.join-form input {
+    padding: 1rem;
+    border: 1px solid #d8dee9;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    width: 180px;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 3px;
+    background-color: #fff;
+}
+
+.join-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(73, 138, 251, 0.2);
+}
+
+.join-form .btn {
+    padding: 1rem 2rem; /* Make button height match input */
+}
+
+/* Add this to the end of style.css */
+
+/* --- Polished Game Screen Layout --- */
+
+.game-wrapper {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+    max-width: 450px;
+}
+
+/* Style the main status text (e.g., "Your Turn") */
+.game-wrapper #game-status-display {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    min-height: 2.2rem; /* Prevents layout shifts when text changes */
+}
+
+/* Style the secondary text (Game ID) */
+.game-wrapper p {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+/* Add some space above the game board */
+.game-wrapper .container {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Refine the scoreboard appearance */
+.scoreboard {
+    border: none;
+    background-color: #f8f9fa;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Make game control buttons a uniform size --- */
+.permanent-controls .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}

@@ -1,0 +1,175 @@
+/* In auth.css */
+/* This file now ONLY contains styles for the auth form itself. */
+
+.toggle-radio {
+    display: none;
+}
+
+/* Auth Page Specific Styles */
+.auth-container {
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Toggle Switch Styles */
+.toggle-container {
+    position: relative;
+    display: flex;
+    background-color: #e9ecef;
+    border-radius: 25px;
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.toggle-container label {
+    flex: 1;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 2;
+    transition: color 0.3s ease;
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background-color: var(--primary-color);
+    border-radius: 25px;
+    z-index: 1;
+    transition: transform 0.3s ease-in-out;
+}
+
+#login-toggle:checked ~ .toggle-container .toggle-slider {
+    transform: translateX(0%);
+}
+#login-toggle:checked ~ .toggle-container label[for="login-toggle"] {
+    color: white;
+}
+#signup-toggle:checked ~ .toggle-container .toggle-slider {
+    transform: translateX(100%);
+}
+#signup-toggle:checked ~ .toggle-container label[for="signup-toggle"] {
+    color: white;
+}
+
+/* Form layout using display property */
+.form-container {
+    margin-bottom: 25px;
+}
+
+.form {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#login-toggle:checked ~ .form-container #login-form {
+    display: flex;
+}
+
+#signup-toggle:checked ~ .form-container #signup-form {
+    display: flex;
+}
+
+/* General Form Element Styles */
+.form h2 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.form input {
+    padding: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+.form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.back-link {
+    display: inline-block;
+    color: #6c757d;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--primary-color);
+}
+
+/* Loading spinner styles for the button */
+.btn.loading {
+    pointer-events: none; 
+    color: transparent; 
+}
+
+.btn.loading::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    border: 4px solid transparent;
+    border-top-color: black;
+    border-radius: 50%;
+    animation: spinner-anim 1s linear infinite;
+}
+
+@keyframes spinner-anim {
+    from {
+        transform: rotate(0turn);
+    }
+    to {
+        transform: rotate(1turn);
+    }
+}
+
+/* Add this to the end of auth.css */
+
+/* --- Password Strength Feedback --- */
+#password-feedback {
+    text-align: left;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+.password-rules {
+    list-style: none;
+    padding: 0;
+}
+
+.password-rules li {
+    color: #bf616a; /* Red/Invalid by default */
+    margin-bottom: 0.3rem;
+    transition: color 0.3s ease;
+}
+
+.password-rules li::before {
+    content: '✗'; /* Red X */
+    margin-right: 0.5rem;
+    font-weight: bold;
+}
+
+.password-rules li.valid {
+    color: #09C372; /* Green/Valid */
+}
+
+.password-rules li.valid::before {
+    content: '✓'; /* Green Checkmark */
+}
