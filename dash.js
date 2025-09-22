@@ -7,6 +7,20 @@ const dashboardContent = document.querySelector('.dashboard-content');
 const homeLink = document.getElementById('home-link');
 const playOnlineLink = document.getElementById('play-online-link');
 const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+const menuToggleBtn = document.getElementById('menu-toggle-btn');
+const sidebar = document.getElementById('sidebar');
+
+menuToggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+});
+
+// Optional: Close the sidebar when a link is clicked on mobile
+sidebar.addEventListener('click', (e) => {
+    // Check if the screen is mobile and if a link was clicked
+    if (window.innerWidth <= 768 && e.target.tagName === 'A') {
+        sidebar.classList.remove('active');
+    }
+});
 
 // --- Global variables ---
 let currentUser = null;
@@ -178,15 +192,12 @@ async function handleJoinGame(e) {
     enterGame(gameId);
 }
 
-
-// --- Main Game Function ---
-
 // In dash.js, replace your existing enterGame function
 
 function enterGame(gameId) {
     isGameActive = true;
     
-    // UPDATED: Added a "Leave Game" button to the HTML
+    // UPDATED: Renamed "Leave Game" to "Delete Game"
     dashboardContent.innerHTML = `
         <div class="game-wrapper">
             <div class="scoreboard">
@@ -200,7 +211,7 @@ function enterGame(gameId) {
             </section>
             <div class="permanent-controls">
                 <button id="reset-round-btn" class="btn btn-reset">Reset Round</button>
-                <button id="leave-game-btn" class="btn btn-secondary" style="display: none;">Leave Game</button>
+                <button id="delete-game-btn" class="btn btn-secondary" style="display: none;">Delete Game</button>
             </div>
         </div>
     `;
@@ -212,7 +223,7 @@ function enterGame(gameId) {
     const p2NameDisplay = document.getElementById('p2-name');
     const p2ScoreDisplay = document.getElementById('p2-score');
     const resetRoundBtn = document.getElementById('reset-round-btn');
-    const leaveGameBtn = document.getElementById('leave-game-btn'); // NEW: Reference to the leave button
+    const deleteGameBtn = document.getElementById('delete-game-btn'); // UPDATED: Reference to the delete button
     const gameRef = db.collection('games').doc(gameId);
     let mySymbol = '';
 
@@ -232,7 +243,6 @@ function enterGame(gameId) {
         newBoard[index] = mySymbol;
         const nextPlayer = mySymbol === 'X' ? 'O' : 'X';
         let updateData = { board: newBoard, currentPlayer: nextPlayer };
-
         const result = checkWinner(newBoard);
         if (result) {
             updateData.status = result.status;
@@ -245,7 +255,6 @@ function enterGame(gameId) {
     }
     
     gameRef.onSnapshot(doc => {
-        // --- NEW: Handle the case where the game document is deleted ---
         if (!doc.exists) {
             alert("The game session has ended.");
             renderDashboardHome();
@@ -256,24 +265,25 @@ function enterGame(gameId) {
         const gameData = doc.data();
         isGameActive = (gameData.status === 'active' || gameData.status === 'waiting');
         mySymbol = (currentUser.uid === gameData.player1Id) ? 'X' : 'O';
-        
         p1NameDisplay.textContent = gameData.player1Name || 'Player 1';
         p1ScoreDisplay.textContent = gameData.player1Wins || 0;
         p2NameDisplay.textContent = gameData.player2Name || 'Waiting...';
         p2ScoreDisplay.textContent = gameData.player2Wins || 0;
 
         let statusText = '';
+        // --- UPDATED: Logic for showing/hiding buttons ---
         if (gameData.status === 'waiting') {
             statusText = 'Waiting for Player 2 to join...';
+            deleteGameBtn.style.display = 'inline-block'; // Show delete button
+            resetRoundBtn.style.display = 'none'; // Hide reset button
         } else if (gameData.status === 'finished') {
-            leaveGameBtn.style.display = 'inline-block'; // NEW: Show the leave button
-            resetRoundBtn.style.display = 'inline-block'; // Make sure reset is also visible
-            if (gameData.winner === 'Tie') statusText = "It's a Tie! Play another round or leave.";
-            else statusText = `${gameData.winner === 'X' ? gameData.player1Name : gameData.player2Name} Won! Play another round or leave.`;
-        } else {
-            leaveGameBtn.style.display = 'none'; // NEW: Hide the leave button during an active game
-            resetRoundBtn.style.display = 'inline-block';
+            statusText = (gameData.winner === 'Tie') ? "It's a Tie!" : `${gameData.winner === 'X' ? gameData.player1Name : gameData.player2Name} Won!`;
+            deleteGameBtn.style.display = 'inline-block'; // Show delete button
+            resetRoundBtn.style.display = 'inline-block'; // Show reset button
+        } else { // status is 'active'
             statusText = (gameData.currentPlayer === mySymbol) ? 'Your Turn' : "Opponent's Turn";
+            deleteGameBtn.style.display = 'none'; // Hide delete button during active play
+            resetRoundBtn.style.display = 'inline-block'; // Show reset button
         }
         gameStatusDisplay.textContent = statusText;
 
@@ -295,12 +305,9 @@ function enterGame(gameId) {
         });
     });
 
-    // --- NEW: Event listener for the "Leave Game" button ---
-    leaveGameBtn.addEventListener('click', () => {
-        gameRef.delete().then(() => {
-            console.log("Game successfully deleted!");
-            // The onSnapshot listener will automatically handle redirecting for both players
-        }).catch((error) => {
+    // UPDATED: Event listener now targets the delete button
+    deleteGameBtn.addEventListener('click', () => {
+        gameRef.delete().catch((error) => {
             console.error("Error removing game: ", error);
         });
     });
