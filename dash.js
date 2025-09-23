@@ -1,14 +1,20 @@
-const userDisplayNameNav = document.getElementById("user-display-name");
-const logoutBtn = document.getElementById("logout-btn");
-const dashboardContent = document.querySelector(".dashboard-content");
-const homeLink = document.getElementById("home-link");
-const playOnlineLink = document.getElementById("play-online-link");
-const sidebarLinks = document.querySelectorAll(".sidebar-nav a");
-let currentUser = null;
-let isGameActive = false;
+// In dash.js
+
+// --- DOM Element References ---
+const userDisplayNameNav = document.getElementById('user-display-name');
+const logoutBtn = document.getElementById('logout-btn');
+const dashboardContent = document.querySelector('.dashboard-content');
+const homeLink = document.getElementById('home-link');
+const playOnlineLink = document.getElementById('play-online-link');
+const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
 const menuToggleBtn = document.getElementById('menu-toggle-btn');
 const sidebar = document.getElementById('sidebar');
 
+// --- Global variables ---
+let currentUser = null;
+let isGameActive = false;
+
+// --- Event Listeners for UI ---
 menuToggleBtn.addEventListener('click', () => {
     sidebar.classList.toggle('active');
 });
@@ -22,7 +28,7 @@ sidebar.addEventListener('click', (e) => {
 auth.onAuthStateChanged((user) => {
   if (user) {
     currentUser = user;
-    renderDashboardHome(); // This function now handles displaying the user's name
+    renderDashboardHome();
     setActiveSidebarLink(homeLink);
   } else {
     currentUser = null;
@@ -31,22 +37,16 @@ auth.onAuthStateChanged((user) => {
 });
 
 logoutBtn.addEventListener("click", () => {
-  // UPDATED: Check if a game is active before logging out
   if (isGameActive) {
     alert("Please complete the current game before logging out.");
     return;
   }
-  auth
-    .signOut()
-    .then(() => {
-      window.location.href = "index.html";
-    })
+  auth.signOut().then(() => window.location.href = "index.html")
     .catch((error) => console.error("Logout failed:", error));
 });
 
 playOnlineLink.addEventListener("click", (e) => {
   e.preventDefault();
-  // UPDATED: Check if a game is active
   if (isGameActive) {
     alert("Please complete the current game to start a new one.");
     return;
@@ -57,16 +57,16 @@ playOnlineLink.addEventListener("click", (e) => {
 
 homeLink.addEventListener("click", (e) => {
   e.preventDefault();
-  // UPDATED: Check if a game is active
   if (isGameActive) {
-    alert(
-      "Please complete the current game before returning to the dashboard home."
-    );
+    alert("Please complete the current game before returning to the dashboard home.");
     return;
   }
   setActiveSidebarLink(homeLink);
   renderDashboardHome();
 });
+
+
+// --- View Rendering and State Management ---
 
 function setActiveSidebarLink(activeLink) {
   sidebarLinks.forEach((link) => link.classList.remove("active"));
@@ -74,7 +74,8 @@ function setActiveSidebarLink(activeLink) {
 }
 
 function renderDashboardHome() {
-  isGameActive = false; // UPDATED: No game is active on the dashboard home
+  isGameActive = false;
+  userDisplayNameNav.textContent = `Welcome, ${currentUser.displayName}!`;
   dashboardContent.innerHTML = `
         <h1>Welcome, <span id="welcome-user-name">${currentUser.displayName}</span>!</h1>
         <p class="subtitle">Select an option from the sidebar to get started.</p>
@@ -88,28 +89,21 @@ function renderDashboardHome() {
 }
 
 function fetchAndDisplayStats(uid) {
-  db.collection("users")
-    .doc(uid)
-    .get()
-    .then((doc) => {
+  db.collection("users").doc(uid).get().then((doc) => {
       if (doc.exists) {
         const userData = doc.data();
         const gamesPlayed = userData.gamesPlayed || 0;
         const gamesWon = userData.gamesWon || 0;
-        let winPercentage =
-          gamesPlayed > 0 ? ((gamesWon / gamesPlayed) * 100).toFixed(1) : 0;
+        let winPercentage = gamesPlayed > 0 ? ((gamesWon / gamesPlayed) * 100).toFixed(1) : 0;
         document.getElementById("games-played").textContent = gamesPlayed;
         document.getElementById("games-won").textContent = gamesWon;
-        document.getElementById(
-          "win-percentage"
-        ).textContent = `${winPercentage}%`;
+        document.getElementById("win-percentage").textContent = `${winPercentage}%`;
       }
-    })
-    .catch((error) => console.log("Error getting user stats:", error));
+    }).catch((error) => console.log("Error getting user stats:", error));
 }
 
 function renderLobbyView() {
-  isGameActive = false; // UPDATED: No game is active in the lobby
+  isGameActive = false;
   dashboardContent.innerHTML = `
         <div class="hero-container">
             <h1>Play Online</h1>
@@ -120,12 +114,8 @@ function renderLobbyView() {
             </div>
         </div>
     `;
-  document
-    .getElementById("make-game-btn")
-    .addEventListener("click", handleMakeGame);
-  document
-    .getElementById("join-game-btn")
-    .addEventListener("click", renderJoinGamePrompt);
+  document.getElementById("make-game-btn").addEventListener("click", handleMakeGame);
+  document.getElementById("join-game-btn").addEventListener("click", renderJoinGamePrompt);
 }
 
 function renderJoinGamePrompt() {
@@ -139,10 +129,11 @@ function renderJoinGamePrompt() {
             </form>
         </div>
     `;
-  document
-    .getElementById("join-form")
-    .addEventListener("submit", handleJoinGame);
+  document.getElementById("join-form").addEventListener("submit", handleJoinGame);
 }
+
+
+// --- Game Creation and Joining Logic ---
 
 async function handleMakeGame() {
   let gameId;
@@ -159,16 +150,10 @@ async function handleMakeGame() {
     }
   }
   const newGame = {
-    player1Id: currentUser.uid,
-    player1Name: currentUser.displayName,
-    player2Id: null,
-    player2Name: null,
-    player1Wins: 0,
-    player2Wins: 0,
+    player1Id: currentUser.uid, player1Name: currentUser.displayName, player2Id: null, player2Name: null,
+    player1Wins: 0, player2Wins: 0, p1StatsUpdated: false, p2StatsUpdated: false,
     board: ["", "", "", "", "", "", "", "", ""],
-    currentPlayer: "X",
-    status: "waiting",
-    winner: null,
+    currentPlayer: "X", status: "waiting", winner: null,
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
   await gameRef.set(newGame);
@@ -198,9 +183,11 @@ async function handleJoinGame(e) {
   enterGame(gameId);
 }
 
+
+// --- Main Game Function ---
+
 function enterGame(gameId) {
     isGameActive = true;
-    
     dashboardContent.innerHTML = `
         <div class="game-wrapper">
             <div class="scoreboard">
@@ -219,7 +206,6 @@ function enterGame(gameId) {
         </div>
     `;
 
-    // References to all the page elements
     const gameBoard = document.getElementById('game-board');
     const gameStatusDisplay = document.getElementById('game-status-display');
     const p1NameDisplay = document.getElementById('p1-name');
@@ -227,11 +213,10 @@ function enterGame(gameId) {
     const p2NameDisplay = document.getElementById('p2-name');
     const p2ScoreDisplay = document.getElementById('p2-score');
     const resetRoundBtn = document.getElementById('reset-round-btn');
-    const deleteGameBtn = document.getElementById('delete-game-btn'); // The button reference
+    const deleteGameBtn = document.getElementById('delete-game-btn');
     const gameRef = db.collection('games').doc(gameId);
     let mySymbol = '';
 
-    // Function to check for a winner
     function checkWinner(board) {
         const winningConditions = [ [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6] ];
         for (let i = 0; i < winningConditions.length; i++) {
@@ -242,7 +227,6 @@ function enterGame(gameId) {
         return null;
     }
 
-    // Function to handle a tile click
     async function handleTileClick(index, currentData) {
         if (currentData.status !== 'active' || currentData.board[index] !== '' || currentData.currentPlayer !== mySymbol) return;
         
@@ -250,20 +234,45 @@ function enterGame(gameId) {
         newBoard[index] = mySymbol;
         const nextPlayer = mySymbol === 'X' ? 'O' : 'X';
         let updateData = { board: newBoard, currentPlayer: nextPlayer };
+
         const result = checkWinner(newBoard);
         if (result) {
             updateData.status = result.status;
             updateData.winner = result.winner;
             if (result.winner === 'X') updateData.player1Wins = firebase.firestore.FieldValue.increment(1);
             else if (result.winner === 'O') updateData.player2Wins = firebase.firestore.FieldValue.increment(1);
-            handleGameFinish(gameData); // Note: Make sure handleGameFinish is defined
         }
         await gameRef.update(updateData);
     }
     
-    // Real-time listener for the game state
+    // CORRECTED: This function handles updating stats when a game is finished
+    function handleGameFinish(gameData) {
+        const amIPlayer1 = currentUser.uid === gameData.player1Id;
+        const amIPlayer2 = currentUser.uid === gameData.player2Id;
+        const myStatsAlreadyUpdated = (amIPlayer1 && gameData.p1StatsUpdated) || (amIPlayer2 && gameData.p2StatsUpdated);
+
+        if (gameData.status === 'finished' && !myStatsAlreadyUpdated) {
+            const userStatsRef = db.collection('users').doc(currentUser.uid);
+            const gameUpdate = {};
+            const userStatsUpdate = {
+                gamesPlayed: firebase.firestore.FieldValue.increment(1)
+            };
+
+            if ((amIPlayer1 && gameData.winner === 'X') || (amIPlayer2 && gameData.winner === 'O')) {
+                userStatsUpdate.gamesWon = firebase.firestore.FieldValue.increment(1);
+            }
+
+            if (amIPlayer1) gameUpdate.p1StatsUpdated = true;
+            if (amIPlayer2) gameUpdate.p2StatsUpdated = true;
+            
+            const batch = db.batch();
+            batch.update(gameRef, gameUpdate);
+            batch.update(userStatsRef, userStatsUpdate);
+            batch.commit().then(() => console.log('Your stats have been updated!'));
+        }
+    }
+    
     gameRef.onSnapshot(doc => {
-        // This part handles the case where the game is deleted by the other player
         if (!doc.exists) {
             alert("The game session has ended.");
             renderDashboardHome();
@@ -272,34 +281,35 @@ function enterGame(gameId) {
         }
 
         const gameData = doc.data();
+        
+        // CORRECTED: Call the function to handle stat updates
+        handleGameFinish(gameData);
+        
         isGameActive = (gameData.status === 'active' || gameData.status === 'waiting');
         mySymbol = (currentUser.uid === gameData.player1Id) ? 'X' : 'O';
-        
-        // Update scoreboard
         p1NameDisplay.textContent = gameData.player1Name || 'Player 1';
         p1ScoreDisplay.textContent = gameData.player1Wins || 0;
         p2NameDisplay.textContent = gameData.player2Name || 'Waiting...';
         p2ScoreDisplay.textContent = gameData.player2Wins || 0;
 
-        // THIS IS THE LOGIC that shows/hides the delete button
         let statusText = '';
         if (gameData.status === 'waiting' || gameData.status === 'finished') {
             deleteGameBtn.style.display = 'inline-block';
         } else {
             deleteGameBtn.style.display = 'none';
         }
-
-        // Update status text
         if (gameData.status === 'waiting') {
             statusText = 'Waiting for Player 2 to join...';
+            resetRoundBtn.style.display = 'none';
         } else if (gameData.status === 'finished') {
             statusText = (gameData.winner === 'Tie') ? "It's a Tie!" : `${gameData.winner === 'X' ? gameData.player1Name : gameData.player2Name} Won!`;
+            resetRoundBtn.style.display = 'inline-block';
         } else {
             statusText = (gameData.currentPlayer === mySymbol) ? 'Your Turn' : "Opponent's Turn";
+            resetRoundBtn.style.display = 'inline-block';
         }
         gameStatusDisplay.textContent = statusText;
 
-        // Update the visual game board
         const tiles = gameBoard.querySelectorAll('.tile');
         tiles.forEach((tile, index) => {
             tile.textContent = gameData.board[index];
@@ -309,7 +319,6 @@ function enterGame(gameId) {
         });
     });
 
-    // Event listener for the Reset Round button
     resetRoundBtn.addEventListener('click', () => {
         gameRef.update({
             board: ['', '', '', '', '', '', '', '', ''],
@@ -319,26 +328,9 @@ function enterGame(gameId) {
         });
     });
 
-    // THIS IS THE EVENT LISTENER for the delete button
     deleteGameBtn.addEventListener('click', () => {
         gameRef.delete().catch((error) => {
             console.error("Error removing game: ", error);
         });
     });
-}
-function updatePlayerStats(gameData, result) {
-  if (!gameData.player1Id || !gameData.player2Id) return;
-  const player1Ref = db.collection("users").doc(gameData.player1Id);
-  const player2Ref = db.collection("users").doc(gameData.player2Id);
-  const increment = firebase.firestore.FieldValue.increment(1);
-  if (result.winner === "X") {
-    player1Ref.update({ gamesPlayed: increment, gamesWon: increment });
-    player2Ref.update({ gamesPlayed: increment });
-  } else if (result.winner === "O") {
-    player1Ref.update({ gamesPlayed: increment });
-    player2Ref.update({ gamesPlayed: increment, gamesWon: increment });
-  } else if (result.winner === "Tie") {
-    player1Ref.update({ gamesPlayed: increment });
-    player2Ref.update({ gamesPlayed: increment });
-  }
 }
