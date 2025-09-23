@@ -73,6 +73,7 @@ function setActiveSidebarLink(activeLink) {
 
 function renderDashboardHome() {
   isGameActive = false;
+  userDisplayNameNav.textContent = `Welcome, ${currentUser.displayName}!`;
   dashboardContent.innerHTML = `
         <h1>Welcome, <span id="welcome-user-name">${currentUser.displayName}</span>!</h1>
         <p class="subtitle">Select an option from the sidebar to get started.</p>
@@ -244,16 +245,19 @@ function enterGame(gameId) {
     
     function handleGameFinish(gameData) {
         if (!gameData || !currentUser) return;
+
         const amIPlayer1 = currentUser.uid === gameData.player1Id;
         const amIPlayer2 = currentUser.uid === gameData.player2Id;
         const myStatsAlreadyUpdated = (amIPlayer1 && gameData.p1StatsUpdated) || (amIPlayer2 && gameData.p2StatsUpdated);
 
         if (gameData.status === 'finished' && !myStatsAlreadyUpdated) {
+            // UPDATED: Disable buttons while processing stats
+            resetRoundBtn.disabled = true;
+            deleteGameBtn.disabled = true;
+
             const userStatsRef = db.collection('users').doc(currentUser.uid);
             const gameUpdate = {};
-            const userStatsUpdate = {
-                gamesPlayed: firebase.firestore.FieldValue.increment(1)
-            };
+            const userStatsUpdate = { gamesPlayed: firebase.firestore.FieldValue.increment(1) };
             if ((amIPlayer1 && gameData.winner === 'X') || (amIPlayer2 && gameData.winner === 'O')) {
                 userStatsUpdate.gamesWon = firebase.firestore.FieldValue.increment(1);
             }
@@ -263,7 +267,12 @@ function enterGame(gameId) {
             const batch = db.batch();
             batch.update(gameRef, gameUpdate);
             batch.update(userStatsRef, userStatsUpdate);
-            batch.commit().then(() => console.log('Your stats have been updated!'));
+            batch.commit().then(() => {
+                console.log('Your stats have been updated!');
+                // Re-enable buttons after stats are saved
+                resetRoundBtn.disabled = false;
+                deleteGameBtn.disabled = false;
+            });
         }
     }
     
@@ -274,6 +283,7 @@ function enterGame(gameId) {
             setActiveSidebarLink(homeLink);
             return;
         }
+
         const gameData = doc.data();
         handleGameFinish(gameData);
         
