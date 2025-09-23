@@ -73,7 +73,6 @@ function setActiveSidebarLink(activeLink) {
 
 function renderDashboardHome() {
   isGameActive = false;
-  userDisplayNameNav.textContent = `Welcome, ${currentUser.displayName}!`;
   dashboardContent.innerHTML = `
         <h1>Welcome, <span id="welcome-user-name">${currentUser.displayName}</span>!</h1>
         <p class="subtitle">Select an option from the sidebar to get started.</p>
