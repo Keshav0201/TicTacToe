@@ -6,6 +6,18 @@ const playOnlineLink = document.getElementById("play-online-link");
 const sidebarLinks = document.querySelectorAll(".sidebar-nav a");
 let currentUser = null;
 let isGameActive = false;
+const menuToggleBtn = document.getElementById('menu-toggle-btn');
+const sidebar = document.getElementById('sidebar');
+
+menuToggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+});
+
+sidebar.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768 && e.target.tagName === 'A') {
+        sidebar.classList.remove('active');
+    }
+});
 
 auth.onAuthStateChanged((user) => {
   if (user) {
@@ -187,9 +199,9 @@ async function handleJoinGame(e) {
 }
 
 function enterGame(gameId) {
-  isGameActive = true;
-
-  dashboardContent.innerHTML = `
+    isGameActive = true;
+    
+    dashboardContent.innerHTML = `
         <div class="game-wrapper">
             <div class="scoreboard">
                 <div class="score playerX"><span id="p1-name">Player 1</span>: <span id="p1-score">0</span></div>
@@ -198,142 +210,121 @@ function enterGame(gameId) {
             <h2 id="game-status-display">Loading game...</h2>
             <p>Game ID: <strong>${gameId}</strong> (Share this with a friend!)</p>
             <section class="container" id="game-board">
-                ${[...Array(9)]
-                  .map((_, i) => `<div class="tile" data-index="${i}"></div>`)
-                  .join("")}
+                ${[...Array(9)].map((_, i) => `<div class="tile" data-index="${i}"></div>`).join('')}
             </section>
             <div class="permanent-controls">
                 <button id="reset-round-btn" class="btn btn-reset">Reset Round</button>
-                <button id="leave-game-btn" class="btn btn-secondary" style="display: none;">Leave Game</button>
+                <button id="delete-game-btn" class="btn btn-secondary" style="display: none;">Delete Game</button>
             </div>
         </div>
     `;
 
-  const gameBoard = document.getElementById("game-board");
-  const gameStatusDisplay = document.getElementById("game-status-display");
-  const p1NameDisplay = document.getElementById("p1-name");
-  const p1ScoreDisplay = document.getElementById("p1-score");
-  const p2NameDisplay = document.getElementById("p2-name");
-  const p2ScoreDisplay = document.getElementById("p2-score");
-  const resetRoundBtn = document.getElementById("reset-round-btn");
-  const leaveGameBtn = document.getElementById("leave-game-btn"); // NEW: Reference to the leave button
-  const gameRef = db.collection("games").doc(gameId);
-  let mySymbol = "";
+    // References to all the page elements
+    const gameBoard = document.getElementById('game-board');
+    const gameStatusDisplay = document.getElementById('game-status-display');
+    const p1NameDisplay = document.getElementById('p1-name');
+    const p1ScoreDisplay = document.getElementById('p1-score');
+    const p2NameDisplay = document.getElementById('p2-name');
+    const p2ScoreDisplay = document.getElementById('p2-score');
+    const resetRoundBtn = document.getElementById('reset-round-btn');
+    const deleteGameBtn = document.getElementById('delete-game-btn'); // The button reference
+    const gameRef = db.collection('games').doc(gameId);
+    let mySymbol = '';
 
-  function checkWinner(board) {
-    const winningConditions = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-    for (let i = 0; i < winningConditions.length; i++) {
-      const [a, b, c] = winningConditions[i];
-      if (board[a] && board[a] === board[b] && board[a] === board[c])
-        return { status: "finished", winner: board[a] };
-    }
-    if (!board.includes("")) return { status: "finished", winner: "Tie" };
-    return null;
-  }
-
-  async function handleTileClick(index, currentData) {
-    if (
-      currentData.status !== "active" ||
-      currentData.board[index] !== "" ||
-      currentData.currentPlayer !== mySymbol
-    )
-      return;
-    const newBoard = [...currentData.board];
-    newBoard[index] = mySymbol;
-    const nextPlayer = mySymbol === "X" ? "O" : "X";
-    let updateData = { board: newBoard, currentPlayer: nextPlayer };
-
-    const result = checkWinner(newBoard);
-    if (result) {
-      updateData.status = result.status;
-      updateData.winner = result.winner;
-      if (result.winner === "X")
-        updateData.player1Wins = firebase.firestore.FieldValue.increment(1);
-      else if (result.winner === "O")
-        updateData.player2Wins = firebase.firestore.FieldValue.increment(1);
-      updatePlayerStats(currentData, result);
-    }
-    await gameRef.update(updateData);
-  }
-
-  gameRef.onSnapshot((doc) => {
-    if (!doc.exists) {
-      alert("The game session has ended.");
-      renderDashboardHome();
-      setActiveSidebarLink(homeLink);
-      return;
+    // Function to check for a winner
+    function checkWinner(board) {
+        const winningConditions = [ [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6] ];
+        for (let i = 0; i < winningConditions.length; i++) {
+            const [a, b, c] = winningConditions[i];
+            if (board[a] && board[a] === board[b] && board[a] === board[c]) return { status: 'finished', winner: board[a] };
+        }
+        if (!board.includes('')) return { status: 'finished', winner: 'Tie' };
+        return null;
     }
 
-    const gameData = doc.data();
-    isGameActive =
-      gameData.status === "active" || gameData.status === "waiting";
-    mySymbol = currentUser.uid === gameData.player1Id ? "X" : "O";
-
-    p1NameDisplay.textContent = gameData.player1Name || "Player 1";
-    p1ScoreDisplay.textContent = gameData.player1Wins || 0;
-    p2NameDisplay.textContent = gameData.player2Name || "Waiting...";
-    p2ScoreDisplay.textContent = gameData.player2Wins || 0;
-
-    let statusText = "";
-    if (gameData.status === "waiting") {
-      statusText = "Waiting for Player 2 to join...";
-    } else if (gameData.status === "finished") {
-      leaveGameBtn.style.display = "inline-block";
-      resetRoundBtn.style.display = "inline-block";
-      if (gameData.winner === "Tie")
-        statusText = "It's a Tie! Play another round or leave.";
-      else
-        statusText = `${
-          gameData.winner === "X" ? gameData.player1Name : gameData.player2Name
-        } Won! Play another round or leave.`;
-    } else {
-      leaveGameBtn.style.display = "none";
-      resetRoundBtn.style.display = "inline-block";
-      statusText =
-        gameData.currentPlayer === mySymbol ? "Your Turn" : "Opponent's Turn";
+    // Function to handle a tile click
+    async function handleTileClick(index, currentData) {
+        if (currentData.status !== 'active' || currentData.board[index] !== '' || currentData.currentPlayer !== mySymbol) return;
+        
+        const newBoard = [...currentData.board];
+        newBoard[index] = mySymbol;
+        const nextPlayer = mySymbol === 'X' ? 'O' : 'X';
+        let updateData = { board: newBoard, currentPlayer: nextPlayer };
+        const result = checkWinner(newBoard);
+        if (result) {
+            updateData.status = result.status;
+            updateData.winner = result.winner;
+            if (result.winner === 'X') updateData.player1Wins = firebase.firestore.FieldValue.increment(1);
+            else if (result.winner === 'O') updateData.player2Wins = firebase.firestore.FieldValue.increment(1);
+            handleGameFinish(gameData); // Note: Make sure handleGameFinish is defined
+        }
+        await gameRef.update(updateData);
     }
-    gameStatusDisplay.textContent = statusText;
+    
+    // Real-time listener for the game state
+    gameRef.onSnapshot(doc => {
+        // This part handles the case where the game is deleted by the other player
+        if (!doc.exists) {
+            alert("The game session has ended.");
+            renderDashboardHome();
+            setActiveSidebarLink(homeLink);
+            return;
+        }
 
-    const tiles = gameBoard.querySelectorAll(".tile");
-    tiles.forEach((tile, index) => {
-      tile.textContent = gameData.board[index];
-      tile.classList.remove("playerX", "playerO");
-      if (gameData.board[index])
-        tile.classList.add(
-          gameData.board[index] === "X" ? "playerX" : "playerO"
-        );
-      tile.onclick = () => handleTileClick(index, gameData);
+        const gameData = doc.data();
+        isGameActive = (gameData.status === 'active' || gameData.status === 'waiting');
+        mySymbol = (currentUser.uid === gameData.player1Id) ? 'X' : 'O';
+        
+        // Update scoreboard
+        p1NameDisplay.textContent = gameData.player1Name || 'Player 1';
+        p1ScoreDisplay.textContent = gameData.player1Wins || 0;
+        p2NameDisplay.textContent = gameData.player2Name || 'Waiting...';
+        p2ScoreDisplay.textContent = gameData.player2Wins || 0;
+
+        // THIS IS THE LOGIC that shows/hides the delete button
+        let statusText = '';
+        if (gameData.status === 'waiting' || gameData.status === 'finished') {
+            deleteGameBtn.style.display = 'inline-block';
+        } else {
+            deleteGameBtn.style.display = 'none';
+        }
+
+        // Update status text
+        if (gameData.status === 'waiting') {
+            statusText = 'Waiting for Player 2 to join...';
+        } else if (gameData.status === 'finished') {
+            statusText = (gameData.winner === 'Tie') ? "It's a Tie!" : `${gameData.winner === 'X' ? gameData.player1Name : gameData.player2Name} Won!`;
+        } else {
+            statusText = (gameData.currentPlayer === mySymbol) ? 'Your Turn' : "Opponent's Turn";
+        }
+        gameStatusDisplay.textContent = statusText;
+
+        // Update the visual game board
+        const tiles = gameBoard.querySelectorAll('.tile');
+        tiles.forEach((tile, index) => {
+            tile.textContent = gameData.board[index];
+            tile.classList.remove('playerX', 'playerO');
+            if(gameData.board[index]) tile.classList.add(gameData.board[index] === 'X' ? 'playerX' : 'playerO');
+            tile.onclick = () => handleTileClick(index, gameData);
+        });
     });
-  });
 
-  resetRoundBtn.addEventListener("click", () => {
-    gameRef.update({
-      board: ["", "", "", "", "", "", "", "", ""],
-      currentPlayer: "X",
-      status: "active",
-      winner: null,
+    // Event listener for the Reset Round button
+    resetRoundBtn.addEventListener('click', () => {
+        gameRef.update({
+            board: ['', '', '', '', '', '', '', '', ''],
+            currentPlayer: 'X',
+            status: 'active',
+            winner: null
+        });
     });
-  });
 
-  leaveGameBtn.addEventListener("click", () => {
-    gameRef
-      .delete()
-      .then(() => {
-        console.log("Game successfully deleted!");
-      })
-      .catch((error) => {
-        console.error("Error removing game: ", error);
-      });
-  });
+    // THIS IS THE EVENT LISTENER for the delete button
+    deleteGameBtn.addEventListener('click', () => {
+        gameRef.delete().catch((error) => {
+            console.error("Error removing game: ", error);
+        });
+    });
 }
 function updatePlayerStats(gameData, result) {
   if (!gameData.player1Id || !gameData.player2Id) return;

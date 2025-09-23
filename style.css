@@ -424,3 +424,42 @@ body {
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
 }
+
+/* Add this to the end of style.css */
+
+/* --- Responsive Dashboard --- */
+
+/* Hide the menu button on large screens by default */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-right: 1rem;
+}
+
+/* Media query for screens 768px or smaller */
+@media (max-width: 768px) {
+    /* Show the menu button */
+    .menu-toggle {
+        display: block;
+    }
+    
+    /* Style the sidebar for mobile */
+    .sidebar {
+        position: fixed; /* Position it over the content */
+        top: 0;
+        left: 0;
+        height: 100%;
+        z-index: 1000; /* Make sure it's on top */
+        transform: translateX(-100%); /* Hide it off-screen to the left */
+        transition: transform 0.3s ease-in-out;
+    }
+
+    /* This class will be added by JavaScript to show the sidebar */
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
