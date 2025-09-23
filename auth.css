@@ -173,3 +173,49 @@
 .password-rules li.valid::before {
     content: '✓'; /* Green Checkmark */
 }
+
+.divider {
+    text-align: center;
+    margin: 25px 0;
+    color: #6c757d;
+    font-weight: bold;
+    position: relative;
+}
+.divider::before, .divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background-color: #ced4da;
+}
+.divider::before {
+    left: 0;
+}
+.divider::after {
+    right: 0;
+}
+
+.btn-google {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    background-color: #fff;
+    color: #444;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.btn-google:hover {
+    background-color: #f8f9fa;
+}
+.btn-google svg {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+}
