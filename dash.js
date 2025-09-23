@@ -1,5 +1,3 @@
-// In dash.js
-
 // --- DOM Element References ---
 const userDisplayNameNav = document.getElementById('user-display-name');
 const logoutBtn = document.getElementById('logout-btn');
@@ -245,8 +243,8 @@ function enterGame(gameId) {
         await gameRef.update(updateData);
     }
     
-    // CORRECTED: This function handles updating stats when a game is finished
     function handleGameFinish(gameData) {
+        if (!gameData || !currentUser) return;
         const amIPlayer1 = currentUser.uid === gameData.player1Id;
         const amIPlayer2 = currentUser.uid === gameData.player2Id;
         const myStatsAlreadyUpdated = (amIPlayer1 && gameData.p1StatsUpdated) || (amIPlayer2 && gameData.p2StatsUpdated);
@@ -257,11 +255,9 @@ function enterGame(gameId) {
             const userStatsUpdate = {
                 gamesPlayed: firebase.firestore.FieldValue.increment(1)
             };
-
             if ((amIPlayer1 && gameData.winner === 'X') || (amIPlayer2 && gameData.winner === 'O')) {
                 userStatsUpdate.gamesWon = firebase.firestore.FieldValue.increment(1);
             }
-
             if (amIPlayer1) gameUpdate.p1StatsUpdated = true;
             if (amIPlayer2) gameUpdate.p2StatsUpdated = true;
             
@@ -279,10 +275,7 @@ function enterGame(gameId) {
             setActiveSidebarLink(homeLink);
             return;
         }
-
         const gameData = doc.data();
-        
-        // CORRECTED: Call the function to handle stat updates
         handleGameFinish(gameData);
         
         isGameActive = (gameData.status === 'active' || gameData.status === 'waiting');
@@ -319,12 +312,15 @@ function enterGame(gameId) {
         });
     });
 
+    // UPDATED: The reset button now also resets the stat-update flags
     resetRoundBtn.addEventListener('click', () => {
         gameRef.update({
             board: ['', '', '', '', '', '', '', '', ''],
             currentPlayer: 'X',
             status: 'active',
-            winner: null
+            winner: null,
+            p1StatsUpdated: false,
+            p2StatsUpdated: false
         });
     });
 
